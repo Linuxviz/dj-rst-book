@@ -1,4 +1,4 @@
-from django.db.models import Count, Case, When
+from django.db.models import Count, Case, When, Avg
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -12,8 +12,10 @@ from store.serializer import BooksSerializer, UserBookRelationSerializer
 
 
 class BookViewSet(ModelViewSet):
-    queryset = Book.objects.all().annotate(
-            annotated_likes=Count(Case(When(book_with_user__like=True, then=1)))).order_by('id')
+    queryset = Book.objects.annotate(
+            annotated_likes=Count(Case(When(book_with_user__like=True, then=1))),
+            rating=Avg('book_with_user__rate')
+    ).order_by('id')
     serializer_class = BooksSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filter_fields = ['price']  # фильтр сортирует конкретное поле по знаению
