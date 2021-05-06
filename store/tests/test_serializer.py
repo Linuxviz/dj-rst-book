@@ -36,7 +36,7 @@ class BookSerializerTestCase(TestCase):
                         'price':           '2500.00',
                         'author_name':     'jhon',
                         'annotated_likes': 3,
-                        'rating':          '3.67',
+                        'rating':          '3.00',
                         'owner_name':      'test_username1',
                         'readers':         [
                                 {
