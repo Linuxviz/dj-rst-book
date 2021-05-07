@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-
 # Create your models here.
+from django.utils import timezone
 
 
 class Book(models.Model):
@@ -15,6 +15,16 @@ class Book(models.Model):
 
     def __str__(self):
         return f'id:{self.id}, title:{self.title}, price:{self.price}'
+
+
+class Article(models.Model):
+    title = models.CharField(max_length=255)
+    author_name = models.CharField(max_length=255)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='articles')
+    readers = models.ManyToManyField(User, related_name='readed_articles')
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
+    date_of_creating = models.DateTimeField(auto_now_add=True)
+    date_of_last_update = models.DateTimeField(auto_now=True)
 
 
 class UserBookRelation(models.Model):
