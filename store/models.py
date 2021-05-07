@@ -30,6 +30,19 @@ class Article(models.Model):
         return f'id:{self.id}, title:{self.title}'
 
 
+class Review(models.Model):
+    title = models.CharField(max_length=255)
+    text = models.TextField(max_length=10_000)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True, related_name='reviews')
+    author_name = models.CharField(max_length=255)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='my_reviews')
+    readers = models.ManyToManyField(User, through='UserReviewRelation', related_name='reviews')
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
+
+    def __str__(self):
+        return f'id:{self.id}, title:{self.title}'
+
+
 class UserArticleRelation(models.Model):
     RATE_CHOICES = (
             (1, 'Ok'),
@@ -84,3 +97,30 @@ class UserBookRelation(models.Model):
         new_rating = self.rate
         if old_rating != new_rating or creating:
             set_rating(self.book, UserBookRelation, 'book')
+
+
+class UserReviewRelation(models.Model):
+    RATE_CHOICES = (
+            (1, 'Ok'),
+            (2, 'Fine'),
+            (3, 'Good'),
+            (4, 'Amazing'),
+            (5, 'Incredible'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_with_review')
+    review = models.ForeignKey(Review, on_delete=models.SET_NULL, null=True, related_name='review_with_user')
+    like = models.BooleanField(default=True)
+    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True)
+
+    def __str__(self):
+        return f'{self.user} ➤ "{self.review.title}", RATE: {self.rate}'
+
+    def save(self, *args, **kwargs):
+        from store.logic import set_rating
+        creating = not self.pk
+        old_rating = self.rate
+        super().save(*args, **kwargs)
+        new_rating = self.rate
+        if old_rating != new_rating or creating:
+            set_rating(self.review, UserReviewRelation, 'review')
