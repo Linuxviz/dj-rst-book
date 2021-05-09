@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 # Create your models here.
@@ -55,6 +57,21 @@ class Discussion(models.Model):
         return f'id:{self.id}, title:{self.problem_topic}'
 
 
+class Comment(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='my_comments')
+    readers = models.ManyToManyField(User, through='UserCommentRelation', related_name='comments')
+    obj_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    obj_id = models.PositiveIntegerField()
+    obj = GenericForeignKey('obj_type', 'obj_id')
+
+    def __str__(self):
+        return f'id:{self.id}, title:{self.owner}'
+
+
+class UserCommentRelation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_with_comment')
+    comment = models.ForeignKey(Comment, on_delete=models.SET_NULL, null=True, related_name='comment_with_user')
+    like = models.BooleanField(default=True)
 
 
 class UserDiscussionRelation(models.Model):
@@ -67,9 +84,19 @@ class UserDiscussionRelation(models.Model):
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_with_discussion')
-    article = models.ForeignKey(Article, on_delete=models.SET_NULL, null=True, related_name='discussion_with_user')
+    discussion = models.ForeignKey(Discussion, on_delete=models.SET_NULL, null=True,
+                                   related_name='discussion_with_user')
     like = models.BooleanField(default=True)
     rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True)
+
+    def save(self, *args, **kwargs):
+        from store.logic import set_rating
+        creating = not self.pk
+        old_rating = self.rate
+        super().save(*args, **kwargs)
+        new_rating = self.rate
+        if old_rating != new_rating or creating:
+            set_rating(self.discussion, UserReviewRelation, 'review')
 
 
 class UserArticleRelation(models.Model):
