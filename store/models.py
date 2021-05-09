@@ -3,9 +3,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-# Create your models here.
-from django.utils import timezone
-
 
 class Book(models.Model):
     title = models.CharField(max_length=255)
@@ -22,8 +19,8 @@ class Book(models.Model):
 class Article(models.Model):
     title = models.CharField(max_length=255)
     author_name = models.CharField(max_length=255)
-    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='articles')
-    readers = models.ManyToManyField(User, through='UserArticleRelation', related_name='readed_articles')
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='my_articles')
+    readers = models.ManyToManyField(User, through='UserArticleRelation', related_name='articles')
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
     date_of_creating = models.DateTimeField(auto_now_add=True)
     date_of_last_update = models.DateTimeField(auto_now=True)

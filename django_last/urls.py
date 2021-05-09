@@ -20,11 +20,12 @@ from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
 from django_last.settings import DEBUG
-from store.views import BookViewSet, auth, UserBookRelationView
+from store.views import BookViewSet, auth, UserBookRelationView, ArticleViewSet
 
 router = SimpleRouter()
 
 router.register('book', BookViewSet)
+router.register('article', ArticleViewSet)
 router.register('book_relation', UserBookRelationView)
 
 urlpatterns = [

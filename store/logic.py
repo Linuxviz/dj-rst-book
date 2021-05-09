@@ -1,7 +1,5 @@
 from django.db.models import Avg
 
-from store.models import UserBookRelation
-
 
 def set_rating(obj, relation, par):
     rating = relation.objects.filter(**{par: obj}).aggregate(rating=Avg('rate')).get('rating')

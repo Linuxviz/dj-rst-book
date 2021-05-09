@@ -1,17 +1,16 @@
 import json
 
 from django.contrib.auth.models import User
-from django.db import connections, connection
-from django.db.models import Count, Case, When, Avg
+from django.db import connection
+from django.db.models import Count, Case, When
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
-from rest_framework import response, status
+from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APITestCase
 
-from store.serializer import BooksSerializer
-
 from store.models import Book, UserBookRelation
+from store.serializer import BooksSerializer
 
 
 class BooksAPITestCase(APITestCase):

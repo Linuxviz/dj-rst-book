@@ -6,9 +6,16 @@ from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
-from store.models import Book, UserBookRelation
+from store.models import Book, UserBookRelation, Article
 from store.permissions import IsOwnerOrStaffOrReadOnly
-from store.serializer import BooksSerializer, UserBookRelationSerializer
+from store.serializer import BooksSerializer, UserBookRelationSerializer, ArticleSerializer
+
+
+class ArticleViewSet(ModelViewSet):
+    queryset = Article.objects.annotate(
+            annotated_likes=Count(Case(When(article_with_user__like=True, then=1))),
+    ).select_related("owner").prefetch_related('readers').order_by('id')
+    serializer_class = ArticleSerializer
 
 
 class BookViewSet(ModelViewSet):
