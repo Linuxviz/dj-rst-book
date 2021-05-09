@@ -43,6 +43,35 @@ class Review(models.Model):
         return f'id:{self.id}, title:{self.title}'
 
 
+class Discussion(models.Model):
+    problem_topic = models.CharField(max_length=255)
+    text = models.TextField(max_length=10_000)
+    author_name = models.CharField(max_length=255)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='my_discussions')
+    readers = models.ManyToManyField(User, through='UserDiscussionRelation', related_name='discussions')
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
+
+    def __str__(self):
+        return f'id:{self.id}, title:{self.problem_topic}'
+
+
+
+
+class UserDiscussionRelation(models.Model):
+    RATE_CHOICES = (
+            (1, 'Ok'),
+            (2, 'Fine'),
+            (3, 'Good'),
+            (4, 'Amazing'),
+            (5, 'Incredible'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_with_discussion')
+    article = models.ForeignKey(Article, on_delete=models.SET_NULL, null=True, related_name='discussion_with_user')
+    like = models.BooleanField(default=True)
+    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True)
+
+
 class UserArticleRelation(models.Model):
     RATE_CHOICES = (
             (1, 'Ok'),
