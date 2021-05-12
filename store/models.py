@@ -50,6 +50,7 @@ class Discussion(models.Model):
     readers = models.ManyToManyField(User, through='UserDiscussionRelation', related_name='discussions')
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
 
+
     def __str__(self):
         return f'id:{self.id}, title:{self.problem_topic}'
 
@@ -93,7 +94,7 @@ class UserDiscussionRelation(models.Model):
         super().save(*args, **kwargs)
         new_rating = self.rate
         if old_rating != new_rating or creating:
-            set_rating(self.discussion, UserReviewRelation, 'review')
+            set_rating(self.discussion, UserDiscussionRelation, 'discussion')
 
 
 class UserArticleRelation(models.Model):

@@ -2,8 +2,9 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Case, When
 from django.test import TestCase
 
-from store.models import Book, UserBookRelation, Review, UserReviewRelation, Article, UserArticleRelation
-from store.serializer import BooksSerializer, ReviewSerializer, ArticleSerializer
+from store.models import Book, UserBookRelation, Review, UserReviewRelation, Article, UserArticleRelation, Discussion, \
+    UserDiscussionRelation
+from store.serializer import BooksSerializer, ReviewSerializer, ArticleSerializer, DiscussionSerializer
 
 
 class BookSerializerTestCase(TestCase):
@@ -228,7 +229,80 @@ class ArticleSerializerTestCase(TestCase):
                 'date_of_last_update': self.article_2.date_of_last_update.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
             }
         ]
-        print(expected_data)
-        print("_____________________________")
-        print(serializer_data)
+        self.assertEqual(expected_data, serializer_data)
+
+
+class DiscussionSerializerTestCase(TestCase):
+    def test_ok(self):
+        self.user1 = User.objects.create(username='test_username1', first_name='petr', last_name='letor')
+        self.user2 = User.objects.create(username='test_username2', first_name='metr', last_name='heiter')
+        self.user3 = User.objects.create(username='test_username3', )
+        self.discussion_1 = Discussion.objects.create(problem_topic="Some title", text="text", author_name='jhon',
+                                                      owner=self.user1)
+        self.discussion_2 = Discussion.objects.create(problem_topic="Some book", text="text", author_name='lemon')
+
+        UserDiscussionRelation.objects.create(user=self.user1, discussion=self.discussion_1, like=True, rate=3)
+        UserDiscussionRelation.objects.create(user=self.user2, discussion=self.discussion_1, like=True, rate=3)
+        ur3 = UserDiscussionRelation.objects.create(user=self.user3, discussion=self.discussion_1, like=True)
+        ur3.rate = 3
+        ur3.save()
+
+        UserDiscussionRelation.objects.create(user=self.user1, discussion=self.discussion_2, like=True, rate=5)
+        UserDiscussionRelation.objects.create(user=self.user2, discussion=self.discussion_2, like=True, rate=2)
+        UserDiscussionRelation.objects.create(user=self.user3, discussion=self.discussion_2, like=False)
+
+        discussions = Discussion.objects.all().annotate(
+            annotated_likes=Count(Case(When(discussion_with_user__like=True, then=1))),
+        ).order_by('id')
+
+        serializer_data = DiscussionSerializer(discussions, many=True).data
+        expected_data = [
+            {
+                'id': self.discussion_1.id,
+                'problem_topic': 'Some title',
+                'text': 'text',
+                'author_name': 'jhon',
+                'annotated_likes': 3,
+                'rating': '3.00',
+                'owner_name': 'test_username1',
+
+                'readers': [
+                    {
+                        "first_name": 'petr',
+                        "last_name": 'letor',
+                    },
+                    {
+                        "first_name": 'metr',
+                        "last_name": 'heiter',
+                    },
+                    {
+                        "first_name": '',
+                        "last_name": '',
+                    },
+                ],
+            },
+            {
+                'id': self.discussion_2.id,
+                'problem_topic': 'Some book',
+                'text': 'text',
+                'author_name': 'lemon',
+                'annotated_likes': 2,
+                'rating': '3.50',
+                "owner_name": '',
+                'readers': [
+                    {
+                        "first_name": 'petr',
+                        "last_name": 'letor',
+                    },
+                    {
+                        "first_name": 'metr',
+                        "last_name": 'heiter',
+                    },
+                    {
+                        "first_name": '',
+                        "last_name": '',
+                    },
+                ],
+            }
+        ]
         self.assertEqual(expected_data, serializer_data)
