@@ -29,48 +29,48 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-        'django.contrib.admin',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.messages',
-        'django.contrib.staticfiles',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
 
-        'social_django',
-        'debug_toolbar',
+    'social_django',
+    'debug_toolbar',
 
-        'store',
+    'store',
 ]
 
 MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
-        'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'django_last.urls'
 
 TEMPLATES = [
-        {
-                'BACKEND':  'django.template.backends.django.DjangoTemplates',
-                'DIRS':     [BASE_DIR / 'templates']
-                ,
-                'APP_DIRS': True,
-                'OPTIONS':  {
-                        'context_processors': [
-                                'django.template.context_processors.debug',
-                                'django.template.context_processors.request',
-                                'django.contrib.auth.context_processors.auth',
-                                'django.contrib.messages.context_processors.messages',
-                        ],
-                },
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [Path.joinpath(BASE_DIR, 'templates')]
+        ,
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
         },
+    },
 ]
 
 WSGI_APPLICATION = 'django_last.wsgi.application'
@@ -79,32 +79,32 @@ WSGI_APPLICATION = 'django_last.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-        'default': {
-                'ENGINE':   'django.db.backends.postgresql_psycopg2',
-                'NAME':     'books_db',
-                'USER':     'books_user',
-                'PASSWORD': '123',
-                'HOST':     'localhost',
-                'PORT':     '',
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'books_db',
+        'USER': 'books_user',
+        'PASSWORD': '123',  # 123 for win
+        'HOST': 'localhost',
+        'PORT': '',
+    }
 }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-        {
-                'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-        },
-        {
-                'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        },
-        {
-                'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-        },
-        {
-                'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-        },
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
 # Internationalization
@@ -131,18 +131,18 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-        'DEFAULT_RENDERER_CLASSES': [
-                'rest_framework.renderers.JSONRenderer',
-        ],
-        'DEFAULT_PARSER_CLASSES':   [
-                'rest_framework.parsers.JSONParser',
-        ]
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ]
 }
 
 # настройки аторизации с помощью соц сетей
 AUTHENTICATION_BACKENDS = (
-        'social_core.backends.github.GithubOAuth2',
-        'django.contrib.auth.backends.ModelBackend',
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True

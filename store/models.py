@@ -31,7 +31,7 @@ class Article(models.Model):
 
 class Review(models.Model):
     title = models.CharField(max_length=255)
-    text = models.TextField(max_length=10_000)
+    text = models.TextField(max_length=10_000, blank=True, null=True)
     book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True, related_name='reviews')
     author_name = models.CharField(max_length=255)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='my_reviews')
@@ -73,11 +73,11 @@ class UserCommentRelation(models.Model):
 
 class UserDiscussionRelation(models.Model):
     RATE_CHOICES = (
-            (1, 'Ok'),
-            (2, 'Fine'),
-            (3, 'Good'),
-            (4, 'Amazing'),
-            (5, 'Incredible'),
+        (1, 'Ok'),
+        (2, 'Fine'),
+        (3, 'Good'),
+        (4, 'Amazing'),
+        (5, 'Incredible'),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_with_discussion')
@@ -98,11 +98,11 @@ class UserDiscussionRelation(models.Model):
 
 class UserArticleRelation(models.Model):
     RATE_CHOICES = (
-            (1, 'Ok'),
-            (2, 'Fine'),
-            (3, 'Good'),
-            (4, 'Amazing'),
-            (5, 'Incredible'),
+        (1, 'Ok'),
+        (2, 'Fine'),
+        (3, 'Good'),
+        (4, 'Amazing'),
+        (5, 'Incredible'),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_with_article')
@@ -126,11 +126,11 @@ class UserArticleRelation(models.Model):
 
 class UserBookRelation(models.Model):
     RATE_CHOICES = (
-            (1, 'Ok'),
-            (2, 'Fine'),
-            (3, 'Good'),
-            (4, 'Amazing'),
-            (5, 'Incredible'),
+        (1, 'Ok'),
+        (2, 'Fine'),
+        (3, 'Good'),
+        (4, 'Amazing'),
+        (5, 'Incredible'),
     )
 
     def __str__(self):
@@ -154,11 +154,11 @@ class UserBookRelation(models.Model):
 
 class UserReviewRelation(models.Model):
     RATE_CHOICES = (
-            (1, 'Ok'),
-            (2, 'Fine'),
-            (3, 'Good'),
-            (4, 'Amazing'),
-            (5, 'Incredible'),
+        (1, 'Ok'),
+        (2, 'Fine'),
+        (3, 'Good'),
+        (4, 'Amazing'),
+        (5, 'Incredible'),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_with_review')

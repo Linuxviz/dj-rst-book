@@ -17,24 +17,18 @@ import debug_toolbar
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import SimpleRouter
 
 from django_last.settings import DEBUG
-from store.views import BookViewSet, auth, UserBookRelationView, ArticleViewSet
-
-router = SimpleRouter()
-
-router.register('book', BookViewSet)
-router.register('article', ArticleViewSet)
-router.register('book_relation', UserBookRelationView)
+from store.urls import store_router
+from store.views import auth
 
 urlpatterns = [
-        path('admin/', admin.site.urls),
-        url('', include('social_django.urls', namespace='social')),
-        path('auth/', auth),
+    path('admin/', admin.site.urls),
+    url('', include('social_django.urls', namespace='social')),
+    path('auth/', auth),
 ]
 
-urlpatterns.extend(router.urls)
+urlpatterns.extend(store_router.urls)
 
 if DEBUG:
     urlpatterns.append(path('__debug__/', include(debug_toolbar.urls)))
