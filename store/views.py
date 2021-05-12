@@ -14,14 +14,18 @@ from store.serializer import BooksSerializer, UserBookRelationSerializer, Articl
 class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.annotate(
             annotated_likes=Count(Case(When(article_with_user__like=True, then=1))),
-    ).select_related("owner").prefetch_related('readers').order_by('id')
+    ).select_related('owner').prefetch_related('readers').order_by('id')
     serializer_class = ArticleSerializer
+
+    def perform_create(self, serializer):
+        serializer.validated_data['owner'] = self.request.user
+        serializer.save()
 
 
 class BookViewSet(ModelViewSet):
     queryset = Book.objects.annotate(
             annotated_likes=Count(Case(When(book_with_user__like=True, then=1))),
-    ).select_related("owner").prefetch_related('readers').order_by('id')
+    ).select_related('owner').prefetch_related('readers').order_by('id')
     serializer_class = BooksSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filter_fields = ['price']  # фильтр сортирует конкретное поле по знаению

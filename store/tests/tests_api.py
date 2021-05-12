@@ -9,8 +9,8 @@ from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APITestCase
 
-from store.models import Book, UserBookRelation
-from store.serializer import BooksSerializer
+from store.models import Book, UserBookRelation, Article, UserArticleRelation
+from store.serializer import BooksSerializer, ArticleSerializer
 
 
 class BooksAPITestCase(APITestCase):
@@ -189,3 +189,61 @@ class BooksRelationsAPITestCase(APITestCase):
         response = self.client.patch(url, data=data,
                                      content_type='application/json')
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+
+class ArticleAPITestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='test_username')
+        self.user2 = User.objects.create(username='test_username_2')
+        self.user3 = User.objects.create(username='test_username_3')
+        self.article_1 = Article.objects.create(title="Some title", author_name="rick", owner=self.user)
+        self.article_2 = Article.objects.create(title="Some book", author_name="pick", owner=self.user)
+        self.article_3 = Article.objects.create(title="Some book1", author_name="sam", owner=self.user)
+        self.article_4 = Article.objects.create(title="Some book2 rick", author_name="tom", owner=self.user)
+        self.article_5 = Article.objects.create(title="Dead souls", author_name="jhon lemon", owner=self.user)
+        self.ur1 = UserArticleRelation.objects.create(user=self.user, article=self.article_1, like=True, rate=5)
+        self.ur2 = UserArticleRelation.objects.create(user=self.user3, article=self.article_1, like=True, rate=3)
+
+    def test_get(self):
+        url = reverse("article-list")
+        response = self.client.get(url)
+        queryset = Article.objects.all().annotate(
+                annotated_likes=Count(Case(When(article_with_user__like=True, then=1))),
+        ).order_by('id')
+        serializer_data = ArticleSerializer(queryset,
+                                            many=True).data
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(serializer_data, response.data)
+        self.assertEqual(serializer_data[0]['rating'], "4.00")
+        self.assertEqual(serializer_data[0]['annotated_likes'], 2)
+
+    def test_update(self):
+        url = reverse("article-detail", args=(self.article_1.pk,))
+        self.client.force_login(self.user)
+        response = self.client.put(url,
+                                   data=json.dumps(
+                                           {
+                                                   'title':       "new_title",
+                                                   'author_name': self.article_1.author_name
+                                           }
+                                   ), content_type='application/json'
+                                   )
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.article_1.refresh_from_db()
+        self.assertEqual("new_title", self.article_1.title)
+
+    def test_create(self):
+        self.assertEqual(5, Article.objects.all().count())
+        url = reverse("article-list")
+        self.client.force_login(self.user)
+        response = self.client.post(url,
+                                    data=json.dumps(
+                                            {
+                                                    'title':       'about trees',
+                                                    'author_name': self.user.username,
+                                            }
+                                    ), content_type='application/json'
+                                    )
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        self.assertEqual(6, Article.objects.all().count())
+        self.assertEqual(self.user, Article.objects.last().owner)
