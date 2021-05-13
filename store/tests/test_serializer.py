@@ -1,10 +1,12 @@
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Case, When
 from django.test import TestCase
 
 from store.models import Book, UserBookRelation, Review, UserReviewRelation, Article, UserArticleRelation, Discussion, \
-    UserDiscussionRelation
-from store.serializer import BooksSerializer, ReviewSerializer, ArticleSerializer, DiscussionSerializer
+    UserDiscussionRelation, Comment, UserCommentRelation
+from store.serializer import BooksSerializer, ReviewSerializer, ArticleSerializer, DiscussionSerializer, \
+    CommentSerializer
 
 
 class BookSerializerTestCase(TestCase):
@@ -303,6 +305,75 @@ class DiscussionSerializerTestCase(TestCase):
                         "last_name": '',
                     },
                 ],
+            }
+        ]
+        self.assertEqual(expected_data, serializer_data)
+
+
+class CommentSerializerTestCase(TestCase):
+    def test_ok(self):
+        self.user1 = User.objects.create(username='test_username1', first_name='petr', last_name='letor')
+        self.user2 = User.objects.create(username='test_username2', first_name='metr', last_name='heiter')
+        self.user3 = User.objects.create(username='test_username3', )
+        self.book_1 = Book.objects.create(title="Some title", price='2500.00', author_name='jhon', owner=self.user1)
+        self.comment_1 = Comment.objects.create(obj_type=ContentType.objects.get_for_model(self.book_1),
+                                                obj_id=self.book_1.pk, owner=self.user1)
+        self.comment_2 = Comment.objects.create(obj_type=ContentType.objects.get_for_model(self.book_1),
+                                                obj_id=self.book_1.pk)
+
+        UserCommentRelation.objects.create(user=self.user1, comment=self.comment_1, like=True)
+        UserCommentRelation.objects.create(user=self.user2, comment=self.comment_1, like=True)
+        ur3 = UserCommentRelation.objects.create(user=self.user3, comment=self.comment_1, like=True)
+
+        UserCommentRelation.objects.create(user=self.user1, comment=self.comment_2, like=True)
+        UserCommentRelation.objects.create(user=self.user2, comment=self.comment_2, like=True)
+        UserCommentRelation.objects.create(user=self.user3, comment=self.comment_2, like=False)
+
+        comments = Comment.objects.all().annotate(
+            annotated_likes=Count(Case(When(comment_with_user__like=True, then=1))),
+        ).order_by('id')
+
+        serializer_data = CommentSerializer(comments, many=True).data
+        expected_data = [
+            {
+                'id': self.comment_1.id,
+                'annotated_likes': 3,
+                'owner_name': 'test_username1',
+                'readers': [
+                    {
+                        "first_name": 'petr',
+                        "last_name": 'letor',
+                    },
+                    {
+                        "first_name": 'metr',
+                        "last_name": 'heiter',
+                    },
+                    {
+                        "first_name": '',
+                        "last_name": '',
+                    },
+                ],
+                'obj': self.book_1,
+            },
+            {
+                'id': self.comment_2.id,
+                'annotated_likes': 2,
+                "owner_name": '',
+                'readers': [
+                    {
+                        "first_name": 'petr',
+                        "last_name": 'letor',
+                    },
+                    {
+                        "first_name": 'metr',
+                        "last_name": 'heiter',
+                    },
+                    {
+                        "first_name": '',
+                        "last_name": '',
+                    },
+                ],
+                'obj': self.book_1,
             }
         ]
         self.assertEqual(expected_data, serializer_data)

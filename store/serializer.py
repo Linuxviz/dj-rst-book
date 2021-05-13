@@ -71,8 +71,8 @@ class CommentSerializer(ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ("id", "title", "author_name", "annotated_likes", "rating", "owner_name",
-                  "readers"
+        fields = ("id", "annotated_likes", "owner_name",
+                  "readers", "obj"
                   )
 
 
