@@ -19,6 +19,11 @@ class ArticleViewSet(ModelViewSet):
         annotated_likes=Count(Case(When(article_with_user__like=True, then=1))),
     ).select_related('owner').prefetch_related('readers').order_by('id')
     serializer_class = ArticleSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_fields = ['title', 'author_name']  # фильтр сортирует конкретное поле по знаению
+    search_fields = ['title', 'author_name']  # поиск позволяет искать все совпадения в указанных полях
+    ordering_fields = ['title', 'author_name']
+    permission_classes = [IsOwnerOrStaffOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.validated_data['owner'] = self.request.user
@@ -62,8 +67,8 @@ class DiscussionViewSet(ModelViewSet):
     ).select_related('owner').prefetch_related('readers').order_by('id')
     serializer_class = DiscussionSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    search_fields = ['title', 'author_name']  # поиск позволяет искать все совпадения в указанных полях
-    ordering_fields = ['price', 'author_name']
+    search_fields = ['problem_topic', 'author_name']  # поиск позволяет искать все совпадения в указанных полях
+    ordering_fields = ['problem_topic', 'author_name']
     permission_classes = [IsOwnerOrStaffOrReadOnly]
 
     def perform_create(self, serializer):
